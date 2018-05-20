@@ -14,7 +14,7 @@ or changing the connection channel in the .bat file and run it.
 
 ## Wiki
 
-Available bot commands can be found on the[wiki (RUS)](https://github.com/Skitale/vote-bot/wiki/List-of-command-(RUS)).
+Available bot commands can be found on the [wiki (RUS)](https://github.com/Skitale/vote-bot/wiki/List-of-command-(RUS)).
 
 ## Releases
 
