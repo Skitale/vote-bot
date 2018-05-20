@@ -18,4 +18,4 @@ Available bot commands can be found on the [wiki (RUS)](https://github.com/Skita
 
 ## Releases
 
-All releases can be found under the [link](https://github.com/Skitale/vote-bot/wiki/List-of-command-(RUS)). 
+All releases can be found under the [link](https://github.com/Skitale/vote-bot/releases). 
