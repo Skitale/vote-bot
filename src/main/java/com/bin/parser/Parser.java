@@ -9,6 +9,7 @@ public class Parser {
     private List<String> excludeList = new ArrayList<>();
     private List<String> includeList = new ArrayList<>();
     private Map<String, String> messages = new HashMap<>();
+    private Map<String, String> configurationValues = new HashMap<>();
 
     public void parseFiles(){
         try {
@@ -43,6 +44,19 @@ public class Parser {
             e.printStackTrace();
         }
 
+        try {
+            Scanner scanner = new Scanner(new FileReader("res/config.txt")).useDelimiter("(\r\n)");
+
+            while (scanner.hasNext()){
+                String srt = scanner.next();
+                String[] array = srt.split("=");
+                Integer i = array[1].indexOf(';');
+                configurationValues.put(array[0].replaceAll(" ", ""), array[1].substring(0, i));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private String parseItemFile(Scanner scanner){
@@ -62,5 +76,9 @@ public class Parser {
 
     public Map<String, String> getMessages() {
         return messages;
+    }
+
+    public Map<String, String> getConfigurationValues() {
+        return configurationValues;
     }
 }
