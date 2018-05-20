@@ -2,7 +2,6 @@ package com.bin;
 
 
 import com.bin.bot.Bot;
-import com.bin.bot.MessageConst;
 import com.bin.parser.Parser;
 import com.bin.steamapi.SteamApiDataStorage;
 import com.bin.steamapi.SteamApiHandler;
@@ -11,9 +10,6 @@ import org.slf4j.Logger;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Member;
-
 
 public class Main {
 
