@@ -1,6 +1,5 @@
 package com.bin.parser;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class ResourceConfig {

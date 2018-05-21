@@ -82,17 +82,16 @@ public class HandlerCommand {
     private String tryAddGameWithoutSteam(String nameGame, User currentUser){
         for(String nameG: includeList){
             if(nameG.toLowerCase().equals(nameGame.toLowerCase())){
+                participantsList.add(currentUser.getNick());
                 for(GamePoint gp : participantsGamesList){
                     if(gp.getGame().getName().toLowerCase().equals(nameGame.toLowerCase())){
                         gp.setPoints(gp.getPoints() + 1);
-                        participantsList.add(currentUser.getNick());
                         return currentUser.getNick() + resourceMessages.getMessage(MessageConst.THANK_YOU);
                     }
                 }
                 Game game = new Game();
                 game.setName(nameG);
                 participantsGamesList.add(new GamePoint(game, 1));
-                participantsList.add(currentUser.getNick());
                 return currentUser.getNick() + resourceMessages.getMessage(MessageConst.THANK_YOU);
             }
         }
@@ -147,7 +146,6 @@ public class HandlerCommand {
                     isExistInOwnerListGame = true;
                     break;
                 }
-                isExistInOwnerListGame = false;
             }
             String nameGame = currentGame.getGame().getName();
             String point =  currentGame.getPoints().toString();

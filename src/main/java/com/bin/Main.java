@@ -13,8 +13,6 @@ import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 public class Main {
 
 	public static Logger logger = LoggerFactory.getLogger(Main.class);
@@ -37,7 +35,7 @@ public class Main {
 		parser.parseFiles();
 
         ResourceConfig resourceConfig = new ResourceConfig(parser.getConfigurationValues());
-        BOTNAME = resourceConfig.getValue(ConfigConst.BOT_NAME);
+        BOTNAME = resourceConfig.getValue(ConfigConst.BOT_NAME).toLowerCase();
         OAUTH = resourceConfig.getValue(ConfigConst.OAUTH);
         STREAMER_PROFILE_STEAM_ID = resourceConfig.getValue(ConfigConst.STREAMER_PROFILE_STEAM_ID);
 
