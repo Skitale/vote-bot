@@ -1,4 +1,4 @@
-START_VOTING = Voting started! Use the command "!vote <name game>" to vote. Everyone has the right to one vote. The name of the game should be the same as in the "Steam", exceptions are specified by the streamer.
+START_VOTING = Привет! Voting started! Use the command "!vote <name game>" to vote. Everyone has the right to one vote. The name of the game should be the same as in the "Steam", exceptions are specified by the streamer.
 SORRY_ALREADY_VOTING = sorry, you already voted.
 SORRY_GAME_IN_BLACKLIST = sorry, this game in blacklist. you can vote again.
 THANK_YOU = thank you for voting!
