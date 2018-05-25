@@ -34,11 +34,11 @@ public class HandlerCommand {
         String msg = event.getMessage();
         User currentUser = event.getUser();
 
-        if(command.equalsIgnoreCase("!startVoting") && isMod(currentUser)){
+        if(command.equalsIgnoreCase("!startvoting") && isMod(currentUser)){
             return startVotingCommand();
         }else if(command.equalsIgnoreCase("!subgames") && isMod(currentUser)){
             return subGamesCommand(dataStorage);
-        } else if(command.equalsIgnoreCase("!clearVoting") && isMod(currentUser)){
+        } else if(command.equalsIgnoreCase("!clearvoting") && isMod(currentUser)){
             return clearVotingCommand();
         }
 
@@ -50,7 +50,7 @@ public class HandlerCommand {
             return getUsersCommand();
         } else if(command.equalsIgnoreCase("!getgames") && isMod(currentUser)){
             return getGamesCommand();
-        } else if(command.equalsIgnoreCase("!stopVoting") && isMod(currentUser)){
+        } else if(command.equalsIgnoreCase("!stopvoting") && isMod(currentUser)){
             return stopVotingCommand();
         }
         return null;
@@ -118,8 +118,8 @@ public class HandlerCommand {
 
     private String voteCommand(String msg, String command, User currentUser, SteamApiDataStorage dataStorage){
         if(msg.equals(command)){return null;}
-        if(isExistInParticipantsList(currentUser) && !isMod(currentUser)){
-            return resourceMessages.getMessage(MessageConst.SORRY_ALREADY_VOTING);
+        if(isExistInParticipantsList(currentUser) /*&& !isMod(currentUser)*/){
+            return currentUser.getNick() + resourceMessages.getMessage(MessageConst.SORRY_ALREADY_VOTING);
         }
 
         String msgGame = msg.substring(command.length() + 1, msg.length());

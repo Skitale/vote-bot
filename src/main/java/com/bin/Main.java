@@ -13,9 +13,11 @@ import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
+
 public class Main {
 
-	public static Logger logger = LoggerFactory.getLogger(Main.class);
+	private static Logger logger = LoggerFactory.getLogger(Main.class);
     public static String BOTNAME;
     public static String OAUTH;
     public static String STREAMER_PROFILE_STEAM_ID;
@@ -31,7 +33,9 @@ public class Main {
 			return;
 		}
 
-		Parser parser = new Parser();
+		String encoding = System.getProperty("console.encoding", "utf-8");
+		logger.info("Encoding = {}", encoding);
+		Parser parser = new Parser(encoding);
 		parser.parseFiles();
 
         ResourceConfig resourceConfig = new ResourceConfig(parser.getConfigurationValues());
@@ -46,6 +50,7 @@ public class Main {
 
 		Configuration config = new Configuration.Builder()
 				.setName(BOTNAME)
+				.setEncoding(StandardCharsets.UTF_8)
 				.addServer("irc.chat.twitch.tv", 6667)
 				.setServerPassword(OAUTH)
 				.addListener(new Bot(dataStorage, parser.getExcludeList(), parser.getIncludeList(), parser.getMessages()))
@@ -54,6 +59,8 @@ public class Main {
 				.setAutoReconnectAttempts(3)
 				.buildConfiguration();
 
+		logger.info("Run bot with locale = {}", config.getLocale());
+		logger.info("Run bot with encoding = {}", config.getEncoding());
 		bot = new PircBotX(config);
 		bot.startBot();
 	}
