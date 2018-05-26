@@ -15,11 +15,11 @@ public class Parser {
         this.encoding = encoding;
     }
 
-    public void parseFiles(){
+    public void parseFiles() {
         try {
             Reader r = new InputStreamReader(new FileInputStream("res/excludeList.txt"), encoding);
             Scanner scanner = new Scanner(r).useDelimiter("(\r\n)");
-            while (scanner.hasNext()){
+            while (scanner.hasNext()) {
                 String srt = parseItemFile(scanner);
                 excludeList.add(srt);
             }
@@ -35,7 +35,7 @@ public class Parser {
         try {
             Reader r = new InputStreamReader(new FileInputStream("res/includeList.txt"), encoding);
             Scanner scanner = new Scanner(r).useDelimiter("(\r\n)");
-            while (scanner.hasNext()){
+            while (scanner.hasNext()) {
                 String srt = parseItemFile(scanner);
                 includeList.add(srt);
             }
@@ -51,7 +51,7 @@ public class Parser {
         try {
             Reader r = new InputStreamReader(new FileInputStream("res/messagesInChat.txt"), encoding);
             Scanner scanner = new Scanner(r).useDelimiter("(\r\n)");
-            while (scanner.hasNext()){
+            while (scanner.hasNext()) {
                 String srt = scanner.next();
                 String[] array = srt.split("=");
                 messages.put(array[0].replaceAll(" ", ""), array[1]);
@@ -68,7 +68,7 @@ public class Parser {
         try {
             Reader r = new InputStreamReader(new FileInputStream("res/config.txt"), encoding);
             Scanner scanner = new Scanner(r).useDelimiter("(\r\n)");
-            while (scanner.hasNext()){
+            while (scanner.hasNext()) {
                 String srt = scanner.next();
                 String[] array = srt.split("=");
                 Integer i = array[1].indexOf(';');
@@ -85,7 +85,7 @@ public class Parser {
 
     }
 
-    private String parseItemFile(Scanner scanner){
+    private String parseItemFile(Scanner scanner) {
         String srt = scanner.next();
         Integer i = srt.indexOf(';');
         srt = srt.substring(0, i);

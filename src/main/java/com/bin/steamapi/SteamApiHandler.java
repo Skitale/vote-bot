@@ -2,8 +2,8 @@ package com.bin.steamapi;
 
 import com.github.goive.steamapi.SteamApi;
 import com.github.goive.steamapi.exceptions.SteamApiException;
-import com.lukaspradel.steamapi.data.json.ownedgames.GetOwnedGames;
 import com.lukaspradel.steamapi.data.json.ownedgames.Game;
+import com.lukaspradel.steamapi.data.json.ownedgames.GetOwnedGames;
 import com.lukaspradel.steamapi.webapi.client.SteamWebApiClient;
 import com.lukaspradel.steamapi.webapi.request.GetOwnedGamesRequest;
 import com.lukaspradel.steamapi.webapi.request.builders.SteamWebApiRequestFactory;
@@ -16,16 +16,16 @@ public class SteamApiHandler {
     private SteamApi steamApi;
     private SteamWebApiClient steamWebApi;
 
-    public SteamApiHandler(String steamKey){
+    public SteamApiHandler(String steamKey) {
         steamApi = new SteamApi();
         steamWebApi = new SteamWebApiClient.SteamWebApiClientBuilder(steamKey).build();
     }
 
-    public List<Game> getAllGames(){
+    public List<Game> getAllGames() {
         List<Game> allGames = new ArrayList<>();
         try {
             Map<Integer, String> list = steamApi.listApps();
-            for(Map.Entry<Integer, String> entry : list.entrySet()){
+            for (Map.Entry<Integer, String> entry : list.entrySet()) {
                 Game g = new Game();
                 g.setName(entry.getValue());
                 g.setAppid(entry.getKey());
@@ -37,7 +37,7 @@ public class SteamApiHandler {
         return allGames;
     }
 
-    public List<Game> getOwnerGames(String ownerSteamProfileId){
+    public List<Game> getOwnerGames(String ownerSteamProfileId) {
         List<Game> games = new ArrayList<>();
         try {
             GetOwnedGamesRequest request = SteamWebApiRequestFactory.createGetOwnedGamesRequest(ownerSteamProfileId);
@@ -49,7 +49,7 @@ public class SteamApiHandler {
         return games;
     }
 
-    public SteamApiDataStorage getDataStorage(String ownerSteamProfileId){
+    public SteamApiDataStorage getDataStorage(String ownerSteamProfileId) {
         SteamApiDataStorage steamApiDataStorage = new SteamApiDataStorage();
         steamApiDataStorage.setListAllGames(getAllGames());
         steamApiDataStorage.setListOwnerGames(getOwnerGames(ownerSteamProfileId));

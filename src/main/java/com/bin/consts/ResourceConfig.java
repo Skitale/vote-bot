@@ -10,8 +10,8 @@ public class ResourceConfig {
         this.configurationValues = configurationValues;
     }
 
-    public String getValue(String key){
-        if(configurationValues.get(key) == null){
+    public String getValue(String key) {
+        if (configurationValues.get(key) == null) {
             throw new NullPointerException("Configuration value " + key + " is null");
         }
         return configurationValues.get(key);

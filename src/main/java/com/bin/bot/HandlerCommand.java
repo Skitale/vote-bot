@@ -24,7 +24,7 @@ public class HandlerCommand {
     private boolean isStart = false;
     private boolean onlySubMode = true;
 
-    public HandlerCommand(String owner, List<String> mods, List<String> excludeList, List<String> includeList, Map<String, String> messages){
+    public HandlerCommand(String owner, List<String> mods, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
         this.mods = mods;
         this.ownerNickName = owner;
         this.resourceMessages = new ResourceMessages(messages);
@@ -34,50 +34,50 @@ public class HandlerCommand {
         participantsGamesList = new ArrayList<>();
     }
 
-    public String handleCommand(GenericMessageEvent event, String command, SteamApiDataStorage dataStorage){
+    public String handleCommand(GenericMessageEvent event, String command, SteamApiDataStorage dataStorage) {
         boolean isSub = checkSubForUser(event);
-        if(command == null) return null;
+        if (command == null) return null;
         String msg = event.getMessage();
         User currentUser = event.getUser();
 
-        if(command.equalsIgnoreCase("!startvoting") && isMod(currentUser)){
+        if (command.equalsIgnoreCase("!startvoting") && isMod(currentUser)) {
             return startVotingCommand();
-        }else if(command.equalsIgnoreCase("!subgames") && isMod(currentUser)){
+        } else if (command.equalsIgnoreCase("!subgames") && isMod(currentUser)) {
             return subGamesCommand(dataStorage);
-        } else if(command.equalsIgnoreCase("!clearvoting") && isMod(currentUser)){
+        } else if (command.equalsIgnoreCase("!clearvoting") && isMod(currentUser)) {
             return clearVotingCommand();
-        } else if(command.equalsIgnoreCase("!submod") && isMod(currentUser)){
+        } else if (command.equalsIgnoreCase("!submod") && isMod(currentUser)) {
             return subModCommand();
         }
 
-        if(!isStart) return null;
+        if (!isStart) return null;
 
-        if(command.startsWith("!vote") && validationRightForVote(isSub)){
+        if (command.startsWith("!vote") && validationRightForVote(isSub)) {
             return voteCommand(msg, command, currentUser, dataStorage);
-        } else if(command.equalsIgnoreCase("!getusers") && isMod(currentUser)){
+        } else if (command.equalsIgnoreCase("!getusers") && isMod(currentUser)) {
             return getUsersCommand();
-        } else if(command.equalsIgnoreCase("!getgames") && isMod(currentUser)){
+        } else if (command.equalsIgnoreCase("!getgames") && isMod(currentUser)) {
             return getGamesCommand();
-        } else if(command.equalsIgnoreCase("!stopvoting") && isMod(currentUser)){
+        } else if (command.equalsIgnoreCase("!stopvoting") && isMod(currentUser)) {
             return stopVotingCommand();
         }
         return null;
     }
 
-    private boolean isExistInParticipantsList(User user){
+    private boolean isExistInParticipantsList(User user) {
         return participantsList.contains(user.getNick());
     }
 
-    private String addGame(Game game, User currentUser){
-        for(String nameGame: excludeList){
-            if(game.getName().toLowerCase().equals(nameGame.toLowerCase())){
+    private String addGame(Game game, User currentUser) {
+        for (String nameGame : excludeList) {
+            if (game.getName().toLowerCase().equals(nameGame.toLowerCase())) {
                 return currentUser.getNick() + resourceMessages.getMessage(MessageConst.SORRY_GAME_IN_BLACKLIST);
             }
         }
 
         participantsList.add(currentUser.getNick());
-        for(GamePoint g : participantsGamesList){
-            if(g.getGame().equals(game)){
+        for (GamePoint g : participantsGamesList) {
+            if (g.getGame().equals(game)) {
                 g.setPoints(g.getPoints() + 1);
                 return currentUser.getNick() + resourceMessages.getMessage(MessageConst.THANK_YOU);
             }
@@ -87,12 +87,12 @@ public class HandlerCommand {
         return currentUser.getNick() + resourceMessages.getMessage(MessageConst.THANK_YOU);
     }
 
-    private String tryAddGameWithoutSteam(String nameGame, User currentUser){
-        for(String nameG: includeList){
-            if(nameG.toLowerCase().equals(nameGame.toLowerCase())){
+    private String tryAddGameWithoutSteam(String nameGame, User currentUser) {
+        for (String nameG : includeList) {
+            if (nameG.toLowerCase().equals(nameGame.toLowerCase())) {
                 participantsList.add(currentUser.getNick());
-                for(GamePoint gp : participantsGamesList){
-                    if(gp.getGame().getName().toLowerCase().equals(nameGame.toLowerCase())){
+                for (GamePoint gp : participantsGamesList) {
+                    if (gp.getGame().getName().toLowerCase().equals(nameGame.toLowerCase())) {
                         gp.setPoints(gp.getPoints() + 1);
                         return currentUser.getNick() + resourceMessages.getMessage(MessageConst.THANK_YOU);
                     }
@@ -106,48 +106,50 @@ public class HandlerCommand {
         return currentUser.getNick() + resourceMessages.getMessage(MessageConst.GAME_NOT_FOUND);
     }
 
-    private String startVotingCommand(){
-        if(isStart) return null;
+    private String startVotingCommand() {
+        if (isStart) return null;
         isStart = true;
         return resourceMessages.getMessage(MessageConst.START_VOTING);
     }
 
-    private String stopVotingCommand(){
-        if(!isStart) return null;
+    private String stopVotingCommand() {
+        if (!isStart) return null;
         isStart = false;
         return resourceMessages.getMessage(MessageConst.STOP_VOTING);
     }
 
-    private String clearVotingCommand(){
+    private String clearVotingCommand() {
         participantsGamesList.clear();
         participantsList.clear();
         return resourceMessages.getMessage(MessageConst.CLEAR_DATA);
     }
 
-    private String voteCommand(String msg, String command, User currentUser, SteamApiDataStorage dataStorage){
-        if(msg.equals(command)){return null;}
-        if(isExistInParticipantsList(currentUser) /*&& !isMod(currentUser)*/){
+    private String voteCommand(String msg, String command, User currentUser, SteamApiDataStorage dataStorage) {
+        if (msg.equals(command)) {
+            return null;
+        }
+        if (isExistInParticipantsList(currentUser) /*&& !isMod(currentUser)*/) {
             return currentUser.getNick() + resourceMessages.getMessage(MessageConst.SORRY_ALREADY_VOTING);
         }
 
         String msgGame = msg.substring(command.length() + 1, msg.length());
         List<Game> gameList = dataStorage.getListAllGames();
-        for(Game g : gameList){
-            if(g.getName().toLowerCase().equals(msgGame.toLowerCase())){
+        for (Game g : gameList) {
+            if (g.getName().toLowerCase().equals(msgGame.toLowerCase())) {
                 return addGame(g, currentUser);
             }
         }
         return tryAddGameWithoutSteam(msgGame, currentUser);
     }
 
-    private String subGamesCommand(SteamApiDataStorage dataStorage){
+    private String subGamesCommand(SteamApiDataStorage dataStorage) {
         List<Game> gamesOwner = dataStorage.getGamesListOwner();
         StringBuilder sb = new StringBuilder();
         sb.append("List of 10 top games: ");
         Collections.sort(participantsGamesList, Collections.reverseOrder());
         int maxIndex = participantsGamesList.size() < 10 ? participantsGamesList.size() : 10;
         boolean isExistInOwnerListGame = false;
-        for (int i = 0; i < maxIndex; i++){
+        for (int i = 0; i < maxIndex; i++) {
             GamePoint currentGame = participantsGamesList.get(i);
             for (Game g : gamesOwner) {
                 if (g.getAppid().equals(currentGame.getGame().getAppid())) {
@@ -156,27 +158,27 @@ public class HandlerCommand {
                 }
             }
             String nameGame = currentGame.getGame().getName();
-            String point =  currentGame.getPoints().toString();
+            String point = currentGame.getPoints().toString();
             String presence = isExistInOwnerListGame ? "yes" : "no";
             sb.append(i + 1).append(") ").append("name: ").append(nameGame).append(", points: ").append(point).append(", availability: ").append(presence).append("; ");
         }
         return sb.toString();
     }
 
-    private String getUsersCommand(){
+    private String getUsersCommand() {
         StringBuilder sb = new StringBuilder();
         sb.append("User list: ");
-        for(String userName : participantsList){
+        for (String userName : participantsList) {
             sb.append(userName);
             sb.append(";");
         }
         return sb.toString();
     }
 
-    private String getGamesCommand(){
+    private String getGamesCommand() {
         StringBuilder sb = new StringBuilder();
         sb.append("List of participants' games: ");
-        for(GamePoint g : participantsGamesList){
+        for (GamePoint g : participantsGamesList) {
             String nameGame = g.getGame().getName();
             String point = g.getPoints().toString();
             sb.append("name: ").append(nameGame).append(", points: ").append(point).append("; ");
@@ -184,8 +186,8 @@ public class HandlerCommand {
         return sb.toString();
     }
 
-    private String subModCommand(){
-        if(onlySubMode) {
+    private String subModCommand() {
+        if (onlySubMode) {
             onlySubMode = false;
         } else {
             onlySubMode = true;
@@ -195,17 +197,17 @@ public class HandlerCommand {
                 : resourceMessages.getMessage(MessageConst.SUB_MOD_OFF));
     }
 
-    private boolean checkSubForUser(GenericMessageEvent event){
-        if(event instanceof MessageEvent) {
-            MessageEvent msgEvent = (MessageEvent)event;
+    private boolean checkSubForUser(GenericMessageEvent event) {
+        if (event instanceof MessageEvent) {
+            MessageEvent msgEvent = (MessageEvent) event;
             String badgesRow = msgEvent.getV3Tags().get(TwitchConst.BADGES);
             return findSubBadge(badgesRow);
         }
         return false;
     }
 
-    private boolean findSubBadge(String rowBadge){
-        String [] parts = rowBadge.split(",|/");
+    private boolean findSubBadge(String rowBadge) {
+        String[] parts = rowBadge.split(",|/");
         for (String part : parts) {
             if (part.equals(TwitchConst.SUB)) {
                 return true;
@@ -214,19 +216,19 @@ public class HandlerCommand {
         return false;
     }
 
-    private boolean validationRightForVote(boolean isSub){
-        if(onlySubMode) {
+    private boolean validationRightForVote(boolean isSub) {
+        if (onlySubMode) {
             return isSub;
         } else {
             return true;
         }
     }
 
-    private boolean isMod(User user){
+    private boolean isMod(User user) {
         return mods.contains(user.getNick());
     }
 
-    private boolean isOwner(User user){
+    private boolean isOwner(User user) {
         return user.getNick().equals(ownerNickName);
     }
 }
