@@ -143,7 +143,7 @@ public class HandlerCommand {
         if (msg.equals(command)) {
             return null;
         }
-        if (isExistInParticipantsList(currentUser) && !isMod(currentUser)) {
+        if (isExistInParticipantsList(currentUser) /*&& !isMod(currentUser)*/) {
             return currentUser.getNick() + resourceMessages.getMessage(MessageConst.SORRY_ALREADY_VOTING);
         }
 
