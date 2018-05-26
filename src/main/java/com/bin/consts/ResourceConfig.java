@@ -1,4 +1,4 @@
-package com.bin.parser;
+package com.bin.consts;
 
 import java.util.Map;
 

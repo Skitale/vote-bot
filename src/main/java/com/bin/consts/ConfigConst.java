@@ -1,4 +1,4 @@
-package com.bin.parser;
+package com.bin.consts;
 
 public class ConfigConst {
     public static final String BOT_NAME = "BOT_NAME";

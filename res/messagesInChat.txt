@@ -5,3 +5,6 @@ THANK_YOU = thank you for voting!
 STOP_VOTING = The vote ended.
 GAME_NOT_FOUND = this game was not found. you can vote again.
 CLEAR_DATA = clear data voting.
+SUB_MOD = sub mode is
+SUB_MOD_ON = on.
+SUB_MOD_OFF = off.

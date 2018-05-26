@@ -2,12 +2,13 @@ package com.bin;
 
 
 import com.bin.bot.Bot;
-import com.bin.parser.ConfigConst;
+import com.bin.consts.ConfigConst;
 import com.bin.parser.Parser;
-import com.bin.parser.ResourceConfig;
+import com.bin.consts.ResourceConfig;
 import com.bin.steamapi.SteamApiDataStorage;
 import com.bin.steamapi.SteamApiHandler;
 
+import org.pircbotx.cap.EnableCapHandler;
 import org.slf4j.Logger;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
@@ -54,6 +55,7 @@ public class Main {
 				.addServer("irc.chat.twitch.tv", 6667)
 				.setServerPassword(OAUTH)
 				.addListener(new Bot(dataStorage, parser.getExcludeList(), parser.getIncludeList(), parser.getMessages()))
+                .addCapHandler(new EnableCapHandler("twitch.tv/tags"))
 				.addAutoJoinChannel("#" + CHANNEL)
 				.setAutoReconnectDelay(3000)
 				.setAutoReconnectAttempts(3)

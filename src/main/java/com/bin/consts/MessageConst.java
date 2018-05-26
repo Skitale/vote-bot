@@ -1,4 +1,4 @@
-package com.bin.bot;
+package com.bin.consts;
 
 import java.lang.reflect.Field;
 

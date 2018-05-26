@@ -1,9 +1,13 @@
 package com.bin.bot;
 
+import com.bin.consts.MessageConst;
+import com.bin.consts.ResourceMessages;
+import com.bin.consts.TwitchConst;
 import com.bin.entity.GamePoint;
 import com.bin.steamapi.SteamApiDataStorage;
 import com.lukaspradel.steamapi.data.json.ownedgames.Game;
 import org.pircbotx.User;
+import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.util.*;
@@ -18,6 +22,7 @@ public class HandlerCommand {
     private String ownerNickName;
     private ResourceMessages resourceMessages;
     private boolean isStart = false;
+    private boolean onlySubMode = true;
 
     public HandlerCommand(String owner, List<String> mods, List<String> excludeList, List<String> includeList, Map<String, String> messages){
         this.mods = mods;
@@ -30,6 +35,7 @@ public class HandlerCommand {
     }
 
     public String handleCommand(GenericMessageEvent event, String command, SteamApiDataStorage dataStorage){
+        boolean isSub = checkSubForUser(event);
         if(command == null) return null;
         String msg = event.getMessage();
         User currentUser = event.getUser();
@@ -40,11 +46,13 @@ public class HandlerCommand {
             return subGamesCommand(dataStorage);
         } else if(command.equalsIgnoreCase("!clearvoting") && isMod(currentUser)){
             return clearVotingCommand();
+        } else if(command.equalsIgnoreCase("!submod") && isMod(currentUser)){
+            return subModCommand();
         }
 
         if(!isStart) return null;
 
-        if(command.startsWith("!vote")){
+        if(command.startsWith("!vote") && validationRightForVote(isSub)){
             return voteCommand(msg, command, currentUser, dataStorage);
         } else if(command.equalsIgnoreCase("!getusers") && isMod(currentUser)){
             return getUsersCommand();
@@ -174,6 +182,44 @@ public class HandlerCommand {
             sb.append("name: ").append(nameGame).append(", points: ").append(point).append("; ");
         }
         return sb.toString();
+    }
+
+    private String subModCommand(){
+        if(onlySubMode) {
+            onlySubMode = false;
+        } else {
+            onlySubMode = true;
+        }
+        return resourceMessages.getMessage(MessageConst.SUB_MOD)
+                + (onlySubMode ? resourceMessages.getMessage(MessageConst.SUB_MOD_ON)
+                : resourceMessages.getMessage(MessageConst.SUB_MOD_OFF));
+    }
+
+    private boolean checkSubForUser(GenericMessageEvent event){
+        if(event instanceof MessageEvent) {
+            MessageEvent msgEvent = (MessageEvent)event;
+            String badgesRow = msgEvent.getV3Tags().get(TwitchConst.BADGES);
+            return findSubBadge(badgesRow);
+        }
+        return false;
+    }
+
+    private boolean findSubBadge(String rowBadge){
+        String [] parts = rowBadge.split(",|/");
+        for (String part : parts) {
+            if (part.equals(TwitchConst.SUB)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean validationRightForVote(boolean isSub){
+        if(onlySubMode) {
+            return isSub;
+        } else {
+            return true;
+        }
     }
 
     private boolean isMod(User user){
