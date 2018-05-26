@@ -4,6 +4,7 @@ import com.bin.consts.MessageConst;
 import com.bin.consts.ResourceMessages;
 import com.bin.consts.TwitchConst;
 import com.bin.entity.GamePoint;
+import com.bin.parser.serialization.SerializationHelper;
 import com.bin.steamapi.SteamApiDataStorage;
 import com.lukaspradel.steamapi.data.json.ownedgames.Game;
 import org.pircbotx.User;
@@ -14,6 +15,7 @@ import java.util.*;
 
 public class HandlerCommand {
 
+    private SerializationHelper serHelper;
     private List<String> mods;
     private Set<String> participantsList;
     private List<GamePoint> participantsGamesList;
@@ -25,13 +27,21 @@ public class HandlerCommand {
     private boolean onlySubMode = true;
 
     public HandlerCommand(String owner, List<String> mods, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run(){
+                serHelper.serialize(participantsList, participantsGamesList);
+            }
+        });
         this.mods = mods;
         this.ownerNickName = owner;
+        this.serHelper = new SerializationHelper();
+        this.serHelper.deserialize();
         this.resourceMessages = new ResourceMessages(messages);
         this.excludeList = excludeList;
         this.includeList = includeList;
-        participantsList = new HashSet<>();
-        participantsGamesList = new ArrayList<>();
+        participantsList = serHelper.getUserSet();
+        participantsGamesList = serHelper.getGameList();
     }
 
     public String handleCommand(GenericMessageEvent event, String command, SteamApiDataStorage dataStorage) {
@@ -77,13 +87,15 @@ public class HandlerCommand {
 
         participantsList.add(currentUser.getNick());
         for (GamePoint g : participantsGamesList) {
-            if (g.getGame().equals(game)) {
+            if (g.getAppId().equals(game.getAppid())) {
                 g.setPoints(g.getPoints() + 1);
+                attachChanges();
                 return currentUser.getNick() + resourceMessages.getMessage(MessageConst.THANK_YOU);
             }
         }
 
         participantsGamesList.add(new GamePoint(game, 1));
+        attachChanges();
         return currentUser.getNick() + resourceMessages.getMessage(MessageConst.THANK_YOU);
     }
 
@@ -92,14 +104,16 @@ public class HandlerCommand {
             if (nameG.toLowerCase().equals(nameGame.toLowerCase())) {
                 participantsList.add(currentUser.getNick());
                 for (GamePoint gp : participantsGamesList) {
-                    if (gp.getGame().getName().toLowerCase().equals(nameGame.toLowerCase())) {
+                    if (gp.getName().toLowerCase().equals(nameGame.toLowerCase())) {
                         gp.setPoints(gp.getPoints() + 1);
+                        attachChanges();
                         return currentUser.getNick() + resourceMessages.getMessage(MessageConst.THANK_YOU);
                     }
                 }
                 Game game = new Game();
                 game.setName(nameG);
                 participantsGamesList.add(new GamePoint(game, 1));
+                attachChanges();
                 return currentUser.getNick() + resourceMessages.getMessage(MessageConst.THANK_YOU);
             }
         }
@@ -121,6 +135,7 @@ public class HandlerCommand {
     private String clearVotingCommand() {
         participantsGamesList.clear();
         participantsList.clear();
+        attachChanges();
         return resourceMessages.getMessage(MessageConst.CLEAR_DATA);
     }
 
@@ -128,7 +143,7 @@ public class HandlerCommand {
         if (msg.equals(command)) {
             return null;
         }
-        if (isExistInParticipantsList(currentUser) /*&& !isMod(currentUser)*/) {
+        if (isExistInParticipantsList(currentUser) && !isMod(currentUser)) {
             return currentUser.getNick() + resourceMessages.getMessage(MessageConst.SORRY_ALREADY_VOTING);
         }
 
@@ -152,12 +167,12 @@ public class HandlerCommand {
         for (int i = 0; i < maxIndex; i++) {
             GamePoint currentGame = participantsGamesList.get(i);
             for (Game g : gamesOwner) {
-                if (g.getAppid().equals(currentGame.getGame().getAppid())) {
+                if (g.getAppid().equals(currentGame.getAppId())) {
                     isExistInOwnerListGame = true;
                     break;
                 }
             }
-            String nameGame = currentGame.getGame().getName();
+            String nameGame = currentGame.getName();
             String point = currentGame.getPoints().toString();
             String presence = isExistInOwnerListGame ? "yes" : "no";
             sb.append(i + 1).append(") ").append("name: ").append(nameGame).append(", points: ").append(point).append(", availability: ").append(presence).append("; ");
@@ -179,7 +194,7 @@ public class HandlerCommand {
         StringBuilder sb = new StringBuilder();
         sb.append("List of participants' games: ");
         for (GamePoint g : participantsGamesList) {
-            String nameGame = g.getGame().getName();
+            String nameGame = g.getName();
             String point = g.getPoints().toString();
             sb.append("name: ").append(nameGame).append(", points: ").append(point).append("; ");
         }
@@ -222,6 +237,10 @@ public class HandlerCommand {
         } else {
             return true;
         }
+    }
+
+    private void attachChanges(){
+        serHelper.serialize(participantsList, participantsGamesList);
     }
 
     private boolean isMod(User user) {
