@@ -6,20 +6,19 @@ import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.PingEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Bot extends ListenerAdapter {
 
-    //Mods usernames must be lowercase
-    private List<String> mods = new ArrayList<String>();
     private SteamApiDataStorage dataStorage;
     private HandlerCommand handlerCommand;
+
+    public static final String URL_CHATTERS = "https://tmi.twitch.tv/group/user/%s/chatters";
 
     public Bot(SteamApiDataStorage steamApiDataStorage, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
         this.dataStorage = steamApiDataStorage;
         String ownerNickName = Main.CHANNEL;
+        Set<String> mods = new HashSet<>();
         mods.add(ownerNickName);
         handlerCommand = new HandlerCommand(ownerNickName, mods, excludeList, includeList, messages);
     }

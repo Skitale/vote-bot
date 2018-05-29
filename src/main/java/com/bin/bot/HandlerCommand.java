@@ -1,12 +1,16 @@
 package com.bin.bot;
 
+import com.bin.Main;
 import com.bin.consts.MessageConst;
 import com.bin.consts.ResourceMessages;
 import com.bin.consts.TwitchConst;
 import com.bin.entity.GamePoint;
+import com.bin.parser.json.JsonParser;
 import com.bin.parser.serialization.SerializationHelper;
 import com.bin.steamapi.SteamApiDataStorage;
 import com.lukaspradel.steamapi.data.json.ownedgames.Game;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.pircbotx.User;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
@@ -16,21 +20,22 @@ import java.util.*;
 public class HandlerCommand {
 
     private SerializationHelper serHelper;
-    private List<String> mods;
+    private Set<String> mods;
     private Set<String> participantsList;
     private List<GamePoint> participantsGamesList;
     private List<String> excludeList;
     private List<String> includeList;
     private String ownerNickName;
     private ResourceMessages resourceMessages;
+    private int maxGamesTop;
     private boolean isStart = false;
     private boolean onlySubMode = true;
 
-    public HandlerCommand(String owner, List<String> mods, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
+    public HandlerCommand(String owner, Set<String> mods, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
         Runtime.getRuntime().addShutdownHook(new Thread(){
             @Override
             public void run(){
-                serHelper.serialize(participantsList, participantsGamesList);
+                serHelper.serialize(participantsList, participantsGamesList, maxGamesTop);
             }
         });
         this.mods = mods;
@@ -40,6 +45,7 @@ public class HandlerCommand {
         this.resourceMessages = new ResourceMessages(messages);
         this.excludeList = excludeList;
         this.includeList = includeList;
+        maxGamesTop = serHelper.getMaxTopGames();
         participantsList = serHelper.getUserSet();
         participantsGamesList = serHelper.getGameList();
     }
@@ -47,16 +53,17 @@ public class HandlerCommand {
     public String handleCommand(GenericMessageEvent event, String command, SteamApiDataStorage dataStorage) {
         boolean isSub = checkSubForUser(event);
         if (command == null) return null;
+        fillModsSet();
         String msg = event.getMessage();
         User currentUser = event.getUser();
 
-        if (command.equalsIgnoreCase("!startvoting") && isMod(currentUser)) {
+        if (command.equalsIgnoreCase("!startvoting") && isOwner(currentUser)) {
             return startVotingCommand();
         } else if (command.equalsIgnoreCase("!subgames") && isMod(currentUser)) {
             return subGamesCommand(dataStorage);
-        } else if (command.equalsIgnoreCase("!clearvoting") && isMod(currentUser)) {
+        } else if (command.equalsIgnoreCase("!clearvoting") && isOwner(currentUser)) {
             return clearVotingCommand();
-        } else if (command.equalsIgnoreCase("!submod") && isMod(currentUser)) {
+        } else if (command.equalsIgnoreCase("!submod") && isOwner(currentUser)) {
             return subModCommand();
         }
 
@@ -64,11 +71,11 @@ public class HandlerCommand {
 
         if (command.startsWith("!vote") && validationRightForVote(isSub)) {
             return voteCommand(msg, command, currentUser, dataStorage);
-        } else if (command.equalsIgnoreCase("!getusers") && isMod(currentUser)) {
+        } else if (command.equalsIgnoreCase("!getusers") && isOwner(currentUser)) {
             return getUsersCommand();
-        } else if (command.equalsIgnoreCase("!getgames") && isMod(currentUser)) {
+        } else if (command.equalsIgnoreCase("!getgames") && isOwner(currentUser)) {
             return getGamesCommand();
-        } else if (command.equalsIgnoreCase("!stopvoting") && isMod(currentUser)) {
+        } else if (command.equalsIgnoreCase("!stopvoting") && isOwner(currentUser)) {
             return stopVotingCommand();
         }
         return null;
@@ -160,9 +167,10 @@ public class HandlerCommand {
     private String subGamesCommand(SteamApiDataStorage dataStorage) {
         List<Game> gamesOwner = dataStorage.getGamesListOwner();
         StringBuilder sb = new StringBuilder();
-        sb.append("List of 10 top games: ");
+        String maxNumTop = String.valueOf(maxGamesTop);
+        sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_TOP_TITLE, maxNumTop));
         Collections.sort(participantsGamesList, Collections.reverseOrder());
-        int maxIndex = participantsGamesList.size() < 10 ? participantsGamesList.size() : 10;
+        int maxIndex = participantsGamesList.size() < maxGamesTop ? participantsGamesList.size() : maxGamesTop;
         boolean isExistInOwnerListGame = false;
         for (int i = 0; i < maxIndex; i++) {
             GamePoint currentGame = participantsGamesList.get(i);
@@ -172,20 +180,20 @@ public class HandlerCommand {
                     break;
                 }
             }
+            String counter = String.valueOf(i + 1);
             String nameGame = currentGame.getName();
             String point = currentGame.getPoints().toString();
             String presence = isExistInOwnerListGame ? "yes" : "no";
-            sb.append(i + 1).append(") ").append("name: ").append(nameGame).append(", points: ").append(point).append(", availability: ").append(presence).append("; ");
+            sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_TOP_GAME_ITEM, counter, nameGame, point, presence));
         }
         return sb.toString();
     }
 
     private String getUsersCommand() {
         StringBuilder sb = new StringBuilder();
-        sb.append("User list: ");
+        sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_USERS_TITLE));
         for (String userName : participantsList) {
-            sb.append(userName);
-            sb.append(";");
+            sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_USERS_USER_ITEM, userName));
         }
         return sb.toString();
     }
@@ -240,7 +248,21 @@ public class HandlerCommand {
     }
 
     private void attachChanges(){
-        serHelper.serialize(participantsList, participantsGamesList);
+        serHelper.serialize(participantsList, participantsGamesList, maxGamesTop);
+    }
+
+    private void fillModsSet(){
+        String urlChatters = String.format(Bot.URL_CHATTERS, Main.CHANNEL);
+        try {
+            String response = JsonParser.readUrl(urlChatters);
+            JSONObject jsonResponse = new JSONObject(response);
+            JSONArray jsonArray = jsonResponse.getJSONObject("chatters").getJSONArray("moderators");
+            for(int i = 0; i < jsonArray.length(); i++){
+                mods.add(jsonArray.getString(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean isMod(User user) {

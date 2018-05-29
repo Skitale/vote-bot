@@ -13,6 +13,10 @@ public class MessageConst {
     public static final String SUB_MOD = "SUB_MOD";
     public static final String SUB_MOD_ON = "SUB_MOD_ON";
     public static final String SUB_MOD_OFF = "SUB_MOD_OFF";
+    public static final String LIST_OF_TOP_TITLE = "LIST_OF_TOP_TITLE";
+    public static final String LIST_OF_TOP_GAME_ITEM = "LIST_OF_TOP_GAME_ITEM";
+    public static final String LIST_OF_USERS_TITLE = "LIST_OF_USERS_TITLE";
+    public static final String LIST_OF_USERS_USER_ITEM = "LIST_OF_USERS_USER_ITEM";
 
     public static final String DEFAULT_START_VOTING = "Voting started! Use the command \"!vote <name game>\" to vote. Everyone has the right to one vote. The name of the game should be the same as in the \"Steam\", exceptions are specified by the streamer.";
     public static final String DEFAULT_SORRY_ALREADY_VOTING = "sorry, you already voted.";
@@ -24,6 +28,10 @@ public class MessageConst {
     public static final String DEFAULT_SUB_MOD = "sub mode is";
     public static final String DEFAULT_SUB_MOD_ON = "on.";
     public static final String DEFAULT_SUB_MOD_OFF = "off.";
+    public static final String DEFAULT_LIST_OF_TOP_TITLE = "List of {1} top games:";
+    public static final String DEFAULT_LIST_OF_TOP_GAME_ITEM = "{1}) name: {2}, points: {3}, availability: {4}; ";
+    public static final String DEFAULT_LIST_OF_USERS_TITLE = "User list:";
+    public static final String DEFAULT_LIST_OF_USERS_USER_ITEM = "{1}; ";
 
     public static String getDefaultMessage(String key){
         try {
