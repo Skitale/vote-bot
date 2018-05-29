@@ -15,11 +15,11 @@ public class GamePoint implements Comparable<GamePoint>, Serializable{
         this.points = points;
     }
 
-    public GamePoint(String name, Integer appId, Integer points) {
+    /*public GamePoint(String name, Integer appId, Integer points) {
         this.appId = appId;
         this.name = name;
         this.points = points;
-    }
+    }*/
 
     public Integer getAppId() {
         return appId;
