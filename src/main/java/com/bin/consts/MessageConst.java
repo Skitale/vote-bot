@@ -39,7 +39,6 @@ public class MessageConst {
         try {
             Class clazz = MessageConst.class;
             Field field = clazz.getDeclaredField("DEFAULT_" + key);
-            //Field field = clazz.getField("DEFAULT_" + key);
             return (String) field.get("DEFAULT_" + key);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();

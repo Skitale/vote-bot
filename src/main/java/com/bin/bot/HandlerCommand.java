@@ -50,6 +50,8 @@ public class HandlerCommand {
         maxGamesTop = serHelper.getMaxTopGames();
         participantsList = serHelper.getUserSet();
         participantsGamesList = serHelper.getGameList();
+        logger.info("Sub mod = {}", onlySubMode);
+        logger.info("Max top value = {}", maxGamesTop);
     }
 
     public String handleCommand(GenericMessageEvent event, String command, SteamApiDataStorage dataStorage) {
@@ -232,6 +234,7 @@ public class HandlerCommand {
         Pattern pattern = Pattern.compile("^(\\d)+$");
         Matcher matcher = pattern.matcher(msgContent);
         if(matcher.find()){
+            if(Integer.valueOf(msgContent) == 0) return null;
             maxGamesTop = Integer.valueOf(msgContent);
             attachSettings();
             return resourceMessages.getMessage(MessageConst.CHANGE_MAX_TOP, String.valueOf(maxGamesTop));
@@ -274,7 +277,6 @@ public class HandlerCommand {
     private void attachSettings(){
         serHelper.serializeSettings(onlySubMode, maxGamesTop);
     }
-
 
     private boolean isMod(User user, List<String> rights) {
         return rights.contains(TwitchConst.BADGE_MODERATOR) || isOwner(user);
