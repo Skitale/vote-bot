@@ -8,6 +8,7 @@ CLEAR_DATA = clear data voting.
 SUB_MOD = sub mode is
 SUB_MOD_ON = on.
 SUB_MOD_OFF = off.
+CHANGE_MAX_TOP = Change max top value to {1}
 LIST_OF_TOP_TITLE = List of {1} top games:
 LIST_OF_TOP_GAME_ITEM = {1}) name: {2}, points: {3}, availability: {4};
 LIST_OF_USERS_TITLE = User list:

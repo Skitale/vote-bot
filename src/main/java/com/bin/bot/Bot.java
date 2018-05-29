@@ -13,14 +13,10 @@ public class Bot extends ListenerAdapter {
     private SteamApiDataStorage dataStorage;
     private HandlerCommand handlerCommand;
 
-    public static final String URL_CHATTERS = "https://tmi.twitch.tv/group/user/%s/chatters";
-
     public Bot(SteamApiDataStorage steamApiDataStorage, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
         this.dataStorage = steamApiDataStorage;
         String ownerNickName = Main.CHANNEL;
-        Set<String> mods = new HashSet<>();
-        mods.add(ownerNickName);
-        handlerCommand = new HandlerCommand(ownerNickName, mods, excludeList, includeList, messages);
+        handlerCommand = new HandlerCommand(ownerNickName, excludeList, includeList, messages);
     }
 
     //This will return the response from the command

@@ -1,26 +1,26 @@
 package com.bin.bot;
 
-import com.bin.Main;
 import com.bin.consts.MessageConst;
 import com.bin.consts.ResourceMessages;
 import com.bin.consts.TwitchConst;
 import com.bin.entity.GamePoint;
-import com.bin.parser.json.JsonParser;
 import com.bin.parser.serialization.SerializationHelper;
 import com.bin.steamapi.SteamApiDataStorage;
 import com.lukaspradel.steamapi.data.json.ownedgames.Game;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.pircbotx.User;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HandlerCommand {
+    private static Logger logger = LoggerFactory.getLogger(HandlerCommand.class);
 
     private SerializationHelper serHelper;
-    private Set<String> mods;
     private Set<String> participantsList;
     private List<GamePoint> participantsGamesList;
     private List<String> excludeList;
@@ -31,45 +31,49 @@ public class HandlerCommand {
     private boolean isStart = false;
     private boolean onlySubMode = true;
 
-    public HandlerCommand(String owner, Set<String> mods, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
+    public HandlerCommand(String owner, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
         Runtime.getRuntime().addShutdownHook(new Thread(){
             @Override
             public void run(){
-                serHelper.serialize(participantsList, participantsGamesList, maxGamesTop);
+                serHelper.serialize(participantsList, participantsGamesList);
+                serHelper.serializeSettings(onlySubMode, maxGamesTop);
             }
         });
-        this.mods = mods;
         this.ownerNickName = owner;
         this.serHelper = new SerializationHelper();
         this.serHelper.deserialize();
+        this.serHelper.deserializeSettings();
         this.resourceMessages = new ResourceMessages(messages);
         this.excludeList = excludeList;
         this.includeList = includeList;
+        onlySubMode = serHelper.getCurrentSubMod();
         maxGamesTop = serHelper.getMaxTopGames();
         participantsList = serHelper.getUserSet();
         participantsGamesList = serHelper.getGameList();
     }
 
     public String handleCommand(GenericMessageEvent event, String command, SteamApiDataStorage dataStorage) {
-        boolean isSub = checkSubForUser(event);
         if (command == null) return null;
-        fillModsSet();
+        List<String> rightsForCurrentUser = getRightForUser(event);
+        logger.debug("list of badges for user {} : {}", event.getUser().getNick(), rightsForCurrentUser);
         String msg = event.getMessage();
         User currentUser = event.getUser();
 
         if (command.equalsIgnoreCase("!startvoting") && isOwner(currentUser)) {
             return startVotingCommand();
-        } else if (command.equalsIgnoreCase("!subgames") && isMod(currentUser)) {
+        } else if (command.equalsIgnoreCase("!subgames") && isMod(currentUser, rightsForCurrentUser)) {
             return subGamesCommand(dataStorage);
         } else if (command.equalsIgnoreCase("!clearvoting") && isOwner(currentUser)) {
             return clearVotingCommand();
         } else if (command.equalsIgnoreCase("!submod") && isOwner(currentUser)) {
             return subModCommand();
+        } else if (command.equalsIgnoreCase("!maxtop") && isOwner(currentUser)){
+            return maxTopCommand(msg, command);
         }
 
         if (!isStart) return null;
 
-        if (command.startsWith("!vote") && validationRightForVote(isSub)) {
+        if (command.startsWith("!vote") && validationRightForVote(rightsForCurrentUser)) {
             return voteCommand(msg, command, currentUser, dataStorage);
         } else if (command.equalsIgnoreCase("!getusers") && isOwner(currentUser)) {
             return getUsersCommand();
@@ -150,7 +154,7 @@ public class HandlerCommand {
         if (msg.equals(command)) {
             return null;
         }
-        if (isExistInParticipantsList(currentUser) /*&& !isMod(currentUser)*/) {
+        if (isExistInParticipantsList(currentUser) /*&& !isMod(currentUser, Collections.emptyList())*/) {
             return currentUser.getNick() + resourceMessages.getMessage(MessageConst.SORRY_ALREADY_VOTING);
         }
 
@@ -220,53 +224,60 @@ public class HandlerCommand {
                 : resourceMessages.getMessage(MessageConst.SUB_MOD_OFF));
     }
 
-    private boolean checkSubForUser(GenericMessageEvent event) {
-        if (event instanceof MessageEvent) {
-            MessageEvent msgEvent = (MessageEvent) event;
-            String badgesRow = msgEvent.getV3Tags().get(TwitchConst.BADGES);
-            return findSubBadge(badgesRow);
+    private String maxTopCommand(String msg, String command){
+        if (msg.equals(command)) {
+            return null;
         }
-        return false;
+        String msgContent = msg.substring(command.length() + 1, msg.length());
+        Pattern pattern = Pattern.compile("^(\\d)+$");
+        Matcher matcher = pattern.matcher(msgContent);
+        if(matcher.find()){
+            maxGamesTop = Integer.valueOf(msgContent);
+            attachSettings();
+            return resourceMessages.getMessage(MessageConst.CHANGE_MAX_TOP, String.valueOf(maxGamesTop));
+        }
+        return null;
     }
 
-    private boolean findSubBadge(String rowBadge) {
-        String[] parts = rowBadge.split(",|/");
-        for (String part : parts) {
-            if (part.equals(TwitchConst.SUB)) {
-                return true;
+    private List<String> getRightForUser(GenericMessageEvent event){
+        if(event instanceof MessageEvent){
+            MessageEvent msgEvent = (MessageEvent) event;
+            String badges = msgEvent.getV3Tags().get(TwitchConst.BADGES);
+            return findAndGetBadge(badges);
+        }
+        return Collections.emptyList();
+    }
+
+    public static List<String> findAndGetBadge(String badges){
+        String [] badgesArray = badges.split("(/\\d+)|,"); // example string "subscriber/6,bits/25000"
+        List<String>  result = new ArrayList<>();
+        for(String item : badgesArray){
+            if(!item.equals("")){
+                result.add(item);
             }
         }
-        return false;
+        return result;
     }
 
-    private boolean validationRightForVote(boolean isSub) {
+    private boolean validationRightForVote(List<String> listRight) {
         if (onlySubMode) {
-            return isSub;
+            return listRight.contains(TwitchConst.BADGE_SUB);
         } else {
             return true;
         }
     }
 
     private void attachChanges(){
-        serHelper.serialize(participantsList, participantsGamesList, maxGamesTop);
+        serHelper.serialize(participantsList, participantsGamesList);
     }
 
-    private void fillModsSet(){
-        String urlChatters = String.format(Bot.URL_CHATTERS, Main.CHANNEL);
-        try {
-            String response = JsonParser.readUrl(urlChatters);
-            JSONObject jsonResponse = new JSONObject(response);
-            JSONArray jsonArray = jsonResponse.getJSONObject("chatters").getJSONArray("moderators");
-            for(int i = 0; i < jsonArray.length(); i++){
-                mods.add(jsonArray.getString(i));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void attachSettings(){
+        serHelper.serializeSettings(onlySubMode, maxGamesTop);
     }
 
-    private boolean isMod(User user) {
-        return mods.contains(user.getNick());
+
+    private boolean isMod(User user, List<String> rights) {
+        return rights.contains(TwitchConst.BADGE_MODERATOR) || isOwner(user);
     }
 
     private boolean isOwner(User user) {
