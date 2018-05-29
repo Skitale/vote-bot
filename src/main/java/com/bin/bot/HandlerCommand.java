@@ -221,6 +221,7 @@ public class HandlerCommand {
         } else {
             onlySubMode = true;
         }
+        attachSettings();
         return resourceMessages.getMessage(MessageConst.SUB_MOD)
                 + (onlySubMode ? resourceMessages.getMessage(MessageConst.SUB_MOD_ON)
                 : resourceMessages.getMessage(MessageConst.SUB_MOD_OFF));
