@@ -1,0 +1,8 @@
+startvoting = O;
+stopvoting = O;
+clearvoting = O;
+submod = O;
+maxtop = O;
+getgames = OM;
+getusers = OM;
+subgames = OM;

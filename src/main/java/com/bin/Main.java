@@ -53,7 +53,7 @@ public class Main {
                 .setEncoding(StandardCharsets.UTF_8)
                 .addServer("irc.chat.twitch.tv", 6667)
                 .setServerPassword(OAUTH)
-                .addListener(new Bot(dataStorage, parser.getExcludeList(), parser.getIncludeList(), parser.getMessages()))
+                .addListener(new Bot(dataStorage, parser.getRightsValues(), parser.getExcludeList(), parser.getIncludeList(), parser.getMessages()))
                 .addCapHandler(new EnableCapHandler("twitch.tv/tags"))
                 .addAutoJoinChannel("#" + CHANNEL)
                 .setAutoReconnectDelay(3000)

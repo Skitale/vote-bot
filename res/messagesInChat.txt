@@ -1,4 +1,4 @@
-START_VOTING = Voting started! Use the command "!vote <name game>" to vote. Everyone has the right to one vote. The name of the game should be the same as in the "Steam", exceptions are specified by the streamer.
+STARTd_VOTING = Voting started! Use the command "!vote <name game>" to vote. Everyone has the right to one vote. The name of the game should be the same as in the "Steam", exceptions are specified by the streamer.
 SORRY_ALREADY_VOTING = sorry, you already voted.
 SORRY_GAME_IN_BLACKLIST = sorry, this game in blacklist. you can vote again.
 THANK_YOU = thank you for voting!
@@ -13,3 +13,7 @@ LIST_OF_TOP_TITLE = List of {1} top games:
 LIST_OF_TOP_GAME_ITEM = {1}) name: {2}, points: {3}, availability: {4};
 LIST_OF_USERS_TITLE = User list:
 LIST_OF_USERS_USER_ITEM = {1};
+LIST_OF_ALL_GAMES = List of participants' games:
+LIST_OF_ALL_GAMES_ITEM = {1}) name: {2}, points: {3}, availability: {4};
+EMPTY_LIST_GAMES = Currently there are no games in the list.
+EMPTY_LIST_USERS = Currently there are no users in the list.

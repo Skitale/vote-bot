@@ -1,14 +1,14 @@
 package com.bin.bot;
 
+import com.bin.consts.CommandConst;
 import com.bin.consts.MessageConst;
 import com.bin.consts.ResourceMessages;
-import com.bin.consts.TwitchConst;
 import com.bin.entity.GamePoint;
 import com.bin.parser.serialization.SerializationHelper;
 import com.bin.steamapi.SteamApiDataStorage;
+import com.bin.validators.RightsValidator;
 import com.lukaspradel.steamapi.data.json.ownedgames.Game;
 import org.pircbotx.User;
-import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +21,7 @@ public class HandlerCommand {
     private static Logger logger = LoggerFactory.getLogger(HandlerCommand.class);
 
     private SerializationHelper serHelper;
+    private RightsValidator validatorRights;
     private Set<String> participantsList;
     private List<GamePoint> participantsGamesList;
     private List<String> excludeList;
@@ -31,7 +32,7 @@ public class HandlerCommand {
     private boolean isStart = false;
     private boolean onlySubMode = true;
 
-    public HandlerCommand(String owner, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
+    public HandlerCommand(String owner, Map<String, List<Character>> rightsMap, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
         Runtime.getRuntime().addShutdownHook(new Thread(){
             @Override
             public void run(){
@@ -40,6 +41,7 @@ public class HandlerCommand {
             }
         });
         this.ownerNickName = owner;
+        this.validatorRights = new RightsValidator(rightsMap, ownerNickName);
         this.serHelper = new SerializationHelper();
         this.serHelper.deserialize();
         this.serHelper.deserializeSettings();
@@ -56,32 +58,38 @@ public class HandlerCommand {
 
     public String handleCommand(GenericMessageEvent event, String command, SteamApiDataStorage dataStorage) {
         if (command == null) return null;
-        List<String> rightsForCurrentUser = getRightForUser(event);
-        logger.debug("list of badges for user {} : {}", event.getUser().getNick(), rightsForCurrentUser);
         String msg = event.getMessage();
         User currentUser = event.getUser();
 
-        if (command.equalsIgnoreCase("!startvoting") && isOwner(currentUser)) {
+        if (command.equalsIgnoreCase(CommandConst.START_VOT)
+                && validatorRights.validationCommandForAccess(event,CommandConst.START_VOT)) {
             return startVotingCommand();
-        } else if (command.equalsIgnoreCase("!subgames") && isMod(currentUser, rightsForCurrentUser)) {
+        } else if (command.equalsIgnoreCase(CommandConst.SUB_GAMES)
+                && validatorRights.validationCommandForAccess(event,CommandConst.SUB_GAMES)) {
             return subGamesCommand(dataStorage);
-        } else if (command.equalsIgnoreCase("!clearvoting") && isOwner(currentUser)) {
+        } else if (command.equalsIgnoreCase(CommandConst.CLEAR_VOT)
+                && validatorRights.validationCommandForAccess(event,CommandConst.CLEAR_VOT)) {
             return clearVotingCommand();
-        } else if (command.equalsIgnoreCase("!submod") && isOwner(currentUser)) {
+        } else if (command.equalsIgnoreCase(CommandConst.SUB_MOD)
+                && validatorRights.validationCommandForAccess(event,CommandConst.SUB_MOD)) {
             return subModCommand();
-        } else if (command.equalsIgnoreCase("!maxtop") && isOwner(currentUser)){
+        } else if (command.equalsIgnoreCase(CommandConst.MAX_TOP)
+                && validatorRights.validationCommandForAccess(event,CommandConst.MAX_TOP)){
             return maxTopCommand(msg, command);
         }
 
         if (!isStart) return null;
 
-        if (command.startsWith("!vote") && validationRightForVote(rightsForCurrentUser)) {
+        if (command.startsWith(CommandConst.VOT) && validatorRights.validationRightForVote(event, onlySubMode)) {
             return voteCommand(msg, command, currentUser, dataStorage);
-        } else if (command.equalsIgnoreCase("!getusers") && isOwner(currentUser)) {
+        } else if (command.equalsIgnoreCase(CommandConst.GET_USERS)
+                && validatorRights.validationCommandForAccess(event,CommandConst.GET_USERS)) {
             return getUsersCommand();
-        } else if (command.equalsIgnoreCase("!getgames") && isOwner(currentUser)) {
-            return getGamesCommand();
-        } else if (command.equalsIgnoreCase("!stopvoting") && isOwner(currentUser)) {
+        } else if (command.equalsIgnoreCase(CommandConst.GET_GAMES)
+                && validatorRights.validationCommandForAccess(event,CommandConst.GET_GAMES)) {
+            return getGamesCommand(dataStorage);
+        } else if (command.equalsIgnoreCase(CommandConst.STOP_VOT)
+                && validatorRights.validationCommandForAccess(event,CommandConst.STOP_VOT)) {
             return stopVotingCommand();
         }
         return null;
@@ -177,22 +185,30 @@ public class HandlerCommand {
         sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_TOP_TITLE, maxNumTop));
         Collections.sort(participantsGamesList, Collections.reverseOrder());
         int maxIndex = participantsGamesList.size() < maxGamesTop ? participantsGamesList.size() : maxGamesTop;
-        boolean isExistInOwnerListGame = false;
         for (int i = 0; i < maxIndex; i++) {
             GamePoint currentGame = participantsGamesList.get(i);
-            for (Game g : gamesOwner) {
-                if (g.getAppid().equals(currentGame.getAppId())) {
-                    isExistInOwnerListGame = true;
-                    break;
-                }
-            }
+            boolean isExistInOwnerListGame = existInOwnerListGame(currentGame, gamesOwner);
+
             String counter = String.valueOf(i + 1);
             String nameGame = currentGame.getName();
             String point = currentGame.getPoints().toString();
             String presence = isExistInOwnerListGame ? "yes" : "no";
             sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_TOP_GAME_ITEM, counter, nameGame, point, presence));
         }
-        return sb.toString();
+        if(maxIndex != 0) {
+            return sb.toString();
+        } else {
+            return resourceMessages.getMessage(MessageConst.EMPTY_LIST_GAMES);
+        }
+    }
+
+    private boolean existInOwnerListGame(GamePoint currentGame, List<Game> gameList){
+        for (Game g : gameList) {
+            if (g.getAppid().equals(currentGame.getAppId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String getUsersCommand() {
@@ -201,18 +217,32 @@ public class HandlerCommand {
         for (String userName : participantsList) {
             sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_USERS_USER_ITEM, userName));
         }
-        return sb.toString();
+        if(participantsList.size() != 0) {
+            return sb.toString();
+        } else {
+            return resourceMessages.getMessage(MessageConst.EMPTY_LIST_USERS);
+        }
     }
 
-    private String getGamesCommand() {
+    private String getGamesCommand(SteamApiDataStorage dataStorage) {
+        List<Game> gamesOwner = dataStorage.getGamesListOwner();
         StringBuilder sb = new StringBuilder();
-        sb.append("List of participants' games: ");
-        for (GamePoint g : participantsGamesList) {
-            String nameGame = g.getName();
-            String point = g.getPoints().toString();
-            sb.append("name: ").append(nameGame).append(", points: ").append(point).append("; ");
+        sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_ALL_GAMES));
+        for(int i = 0; i < participantsGamesList.size(); i++){
+            GamePoint currentGame = participantsGamesList.get(i);
+            boolean isExistInOwnerListGame = existInOwnerListGame(currentGame, gamesOwner);
+
+            String counter = String.valueOf(i + 1);
+            String nameGame = currentGame.getName();
+            String points = currentGame.getPoints().toString();
+            String presence = isExistInOwnerListGame ? "yes" : "no";
+            sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_ALL_GAMES_ITEM, counter, nameGame, points, presence));
         }
-        return sb.toString();
+        if(participantsGamesList.size() != 0) {
+            return sb.toString();
+        } else {
+            return resourceMessages.getMessage(MessageConst.EMPTY_LIST_GAMES);
+        }
     }
 
     private String subModCommand() {
@@ -243,47 +273,11 @@ public class HandlerCommand {
         return null;
     }
 
-    private List<String> getRightForUser(GenericMessageEvent event){
-        if(event instanceof MessageEvent){
-            MessageEvent msgEvent = (MessageEvent) event;
-            String badges = msgEvent.getV3Tags().get(TwitchConst.BADGES);
-            return findAndGetBadge(badges);
-        }
-        return Collections.emptyList();
-    }
-
-    public static List<String> findAndGetBadge(String badges){
-        String [] badgesArray = badges.split("(/\\d+)|,"); // example string "subscriber/6,bits/25000"
-        List<String>  result = new ArrayList<>();
-        for(String item : badgesArray){
-            if(!item.equals("")){
-                result.add(item);
-            }
-        }
-        return result;
-    }
-
-    private boolean validationRightForVote(List<String> listRight) {
-        if (onlySubMode) {
-            return listRight.contains(TwitchConst.BADGE_SUB);
-        } else {
-            return true;
-        }
-    }
-
     private void attachChanges(){
         serHelper.serialize(participantsList, participantsGamesList);
     }
 
     private void attachSettings(){
         serHelper.serializeSettings(onlySubMode, maxGamesTop);
-    }
-
-    private boolean isMod(User user, List<String> rights) {
-        return rights.contains(TwitchConst.BADGE_MODERATOR) || isOwner(user);
-    }
-
-    private boolean isOwner(User user) {
-        return user.getNick().equals(ownerNickName);
     }
 }

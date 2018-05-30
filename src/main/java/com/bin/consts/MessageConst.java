@@ -18,6 +18,10 @@ public class MessageConst {
     public static final String LIST_OF_TOP_GAME_ITEM = "LIST_OF_TOP_GAME_ITEM";
     public static final String LIST_OF_USERS_TITLE = "LIST_OF_USERS_TITLE";
     public static final String LIST_OF_USERS_USER_ITEM = "LIST_OF_USERS_USER_ITEM";
+    public static final String LIST_OF_ALL_GAMES = "LIST_OF_ALL_GAMES";
+    public static final String LIST_OF_ALL_GAMES_ITEM = "LIST_OF_ALL_GAMES_ITEM";
+    public static final String EMPTY_LIST_GAMES = "EMPTY_LIST_GAMES";
+    public static final String EMPTY_LIST_USERS = "EMPTY_LIST_USERS";
 
     private static final String DEFAULT_START_VOTING = "Voting started! Use the command \"!vote <name game>\" to vote. Everyone has the right to one vote. The name of the game should be the same as in the \"Steam\", exceptions are specified by the streamer.";
     private static final String DEFAULT_SORRY_ALREADY_VOTING = "sorry, you already voted.";
@@ -34,6 +38,10 @@ public class MessageConst {
     private static final String DEFAULT_LIST_OF_TOP_GAME_ITEM = "{1}) name: {2}, points: {3}, availability: {4}; ";
     private static final String DEFAULT_LIST_OF_USERS_TITLE = "User list:";
     private static final String DEFAULT_LIST_OF_USERS_USER_ITEM = "{1}; ";
+    private static final String DEFAULT_LIST_OF_ALL_GAMES = "List of participants' games: ";
+    private static final String DEFAULT_LIST_OF_ALL_GAMES_ITEM = "{1}) name: {2}, points: {3}, availability: {4}; ";
+    private static final String DEFAULT_EMPTY_LIST_GAMES = "Currently there are no games in the list.";
+    private static final String DEFAULT_EMPTY_LIST_USERS = "Currently there are no users in the list.";
 
     public static String getDefaultMessage(String key){
         try {

@@ -13,10 +13,10 @@ public class Bot extends ListenerAdapter {
     private SteamApiDataStorage dataStorage;
     private HandlerCommand handlerCommand;
 
-    public Bot(SteamApiDataStorage steamApiDataStorage, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
+    public Bot(SteamApiDataStorage steamApiDataStorage, Map<String, List<Character>> rightsMap, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
         this.dataStorage = steamApiDataStorage;
         String ownerNickName = Main.CHANNEL;
-        handlerCommand = new HandlerCommand(ownerNickName, excludeList, includeList, messages);
+        handlerCommand = new HandlerCommand(ownerNickName, rightsMap, excludeList, includeList, messages);
     }
 
     //This will return the response from the command

@@ -9,6 +9,7 @@ public class Parser {
     private List<String> includeList = new ArrayList<>();
     private Map<String, String> messages = new HashMap<>();
     private Map<String, String> configurationValues = new HashMap<>();
+    private Map<String, List<Character>> rightsValues = new HashMap<>();
     private String encoding;
 
     public Parser(String encoding) {
@@ -71,8 +72,36 @@ public class Parser {
             while (scanner.hasNext()) {
                 String srt = scanner.next();
                 String[] array = srt.split("=");
-                Integer i = array[1].indexOf(';');
-                configurationValues.put(array[0].replaceAll(" ", ""), array[1].substring(0, i));
+                String variable = array[0].replaceAll(" ", "");
+                String value = array[1].replaceAll(" ", "");
+                Integer pos = value.indexOf(';');
+                configurationValues.put(variable, value.substring(0, pos));
+            }
+            r.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Reader r = new InputStreamReader(new FileInputStream("res/rightsConfig.txt"), encoding);
+            Scanner scanner = new Scanner(r).useDelimiter("(\r\n)");
+            while (scanner.hasNext()) {
+                String srt = scanner.next();
+                String[] array = srt.split("=");
+                String command = array[0].replaceAll(" ", "");
+                String value = array[1].replaceAll(" ", "");
+                Integer pos = value.indexOf(';');
+
+                char[] rightsForCommand = value.substring(0, pos).toCharArray();
+                List<Character> rightList = new ArrayList<>();
+                for (char aRightsForCommand : rightsForCommand) {
+                    rightList.add(aRightsForCommand);
+                }
+                rightsValues.put(command, rightList);
             }
             r.close();
         } catch (FileNotFoundException e) {
@@ -106,5 +135,9 @@ public class Parser {
 
     public Map<String, String> getConfigurationValues() {
         return configurationValues;
+    }
+
+    public Map<String, List<Character>> getRightsValues(){
+        return rightsValues;
     }
 }
