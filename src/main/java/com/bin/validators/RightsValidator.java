@@ -38,13 +38,13 @@ public class RightsValidator {
                 }
             }
         }
-        List<String> listBadges = getRightForUser(e);
+        List<String> listBadges = getBadgesForUser(e);
         logger.debug("list of badges for user {} : {}", e.getUser().getNick(), listBadges);
         for(String badge : listBadges){
             badge = badge.toUpperCase();
-            Character firstSymbol = badge.toCharArray()[0];
+            Character codeBadge = TwitchConst.mapOfBadge.get(badge);
             for(Character r : listRights){
-                if(r.equals(firstSymbol)){
+                if(r.equals(codeBadge)){
                     return true;
                 }
             }
@@ -53,16 +53,16 @@ public class RightsValidator {
     }
 
     public boolean validationRightForVote(GenericMessageEvent e, Boolean onlySubMode) {
-        List<String> listBadges = getRightForUser(e);
-        logger.debug("list of badges for user {} : {}", e.getUser().getNick(), listBadges);
         if (onlySubMode) {
+            List<String> listBadges = getBadgesForUser(e);
+            logger.debug("list of badges for user {} : {}", e.getUser().getNick(), listBadges);
             return listBadges.contains(TwitchConst.BADGE_SUB);
         } else {
             return true;
         }
     }
 
-    private List<String> getRightForUser(GenericMessageEvent event){
+    private List<String> getBadgesForUser(GenericMessageEvent event){
         if(event instanceof MessageEvent){
             MessageEvent msgEvent = (MessageEvent) event;
             String badges = msgEvent.getV3Tags().get(TwitchConst.BADGES);
