@@ -1,6 +1,8 @@
 package com.bin.validators;
 
+import com.bin.bot.Bot;
 import com.bin.consts.TwitchConst;
+import com.bin.consts.CommandConst;
 import org.pircbotx.User;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
@@ -24,6 +26,7 @@ public class RightsValidator {
     }
 
     public boolean validationCommandForAccess(GenericMessageEvent e, String command){
+        if (!checkEqualCommandInEvent(e, command)) return false;
         command = command.replaceAll("!","");
         User currentUser = e.getUser();
         List<Character> listRights = Collections.emptyList();
@@ -41,7 +44,7 @@ public class RightsValidator {
         List<String> listBadges = getBadgesForUser(e);
         logger.debug("list of badges for user {} : {}", e.getUser().getNick(), listBadges);
         for(String badge : listBadges){
-            badge = badge.toUpperCase();
+            badge = badge.toLowerCase();
             Character codeBadge = TwitchConst.mapOfBadge.get(badge);
             for(Character r : listRights){
                 if(r.equals(codeBadge)){
@@ -53,6 +56,7 @@ public class RightsValidator {
     }
 
     public boolean validationRightForVote(GenericMessageEvent e, Boolean onlySubMode) {
+        if (!checkEqualCommandInEvent(e, CommandConst.VOT)) return false;
         if (onlySubMode) {
             List<String> listBadges = getBadgesForUser(e);
             logger.debug("list of badges for user {} : {}", e.getUser().getNick(), listBadges);
@@ -80,5 +84,10 @@ public class RightsValidator {
             }
         }
         return result;
+    }
+
+    private boolean checkEqualCommandInEvent(GenericMessageEvent e, String command) {
+        String eventCommand = Bot.getCommandFromMessage(e.getMessage());
+        return command.equalsIgnoreCase(eventCommand);
     }
 }

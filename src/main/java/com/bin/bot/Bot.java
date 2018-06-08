@@ -42,7 +42,7 @@ public class Bot extends ListenerAdapter {
      * The first word if it starts with our command notifier "!" will get returned
      * Otherwise it will return null
      */
-    private String getCommandFromMessage(String message) {
+    public static String getCommandFromMessage(String message) {
         String[] msgParts = message.split(" ");
         if (msgParts.length != 0 && msgParts[0].startsWith("!")) {
             return msgParts[0];

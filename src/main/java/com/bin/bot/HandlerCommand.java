@@ -61,35 +61,27 @@ public class HandlerCommand {
         String msg = event.getMessage();
         User currentUser = event.getUser();
 
-        if (command.equalsIgnoreCase(CommandConst.START_VOT)
-                && validatorRights.validationCommandForAccess(event,CommandConst.START_VOT)) {
+        if (validatorRights.validationCommandForAccess(event, CommandConst.START_VOT)) {
             return startVotingCommand();
-        } else if (command.equalsIgnoreCase(CommandConst.SUB_GAMES)
-                && validatorRights.validationCommandForAccess(event,CommandConst.SUB_GAMES)) {
+        } else if (validatorRights.validationCommandForAccess(event, CommandConst.SUB_GAMES)) {
             return subGamesCommand(dataStorage);
-        } else if (command.equalsIgnoreCase(CommandConst.CLEAR_VOT)
-                && validatorRights.validationCommandForAccess(event,CommandConst.CLEAR_VOT)) {
+        } else if (validatorRights.validationCommandForAccess(event, CommandConst.CLEAR_VOT)) {
             return clearVotingCommand();
-        } else if (command.equalsIgnoreCase(CommandConst.SUB_MOD)
-                && validatorRights.validationCommandForAccess(event,CommandConst.SUB_MOD)) {
+        } else if (validatorRights.validationCommandForAccess(event, CommandConst.SUB_MOD)) {
             return subModCommand();
-        } else if (command.equalsIgnoreCase(CommandConst.MAX_TOP)
-                && validatorRights.validationCommandForAccess(event,CommandConst.MAX_TOP)){
+        } else if (validatorRights.validationCommandForAccess(event, CommandConst.MAX_TOP)) {
             return maxTopCommand(msg, command);
         }
 
         if (!isStart) return null;
 
-        if (command.startsWith(CommandConst.VOT) && validatorRights.validationRightForVote(event, onlySubMode)) {
+        if (validatorRights.validationRightForVote(event, onlySubMode)) {
             return voteCommand(msg, command, currentUser, dataStorage);
-        } else if (command.equalsIgnoreCase(CommandConst.GET_USERS)
-                && validatorRights.validationCommandForAccess(event,CommandConst.GET_USERS)) {
+        } else if (validatorRights.validationCommandForAccess(event, CommandConst.GET_USERS)) {
             return getUsersCommand();
-        } else if (command.equalsIgnoreCase(CommandConst.GET_GAMES)
-                && validatorRights.validationCommandForAccess(event,CommandConst.GET_GAMES)) {
+        } else if (validatorRights.validationCommandForAccess(event, CommandConst.GET_GAMES)) {
             return getGamesCommand(dataStorage);
-        } else if (command.equalsIgnoreCase(CommandConst.STOP_VOT)
-                && validatorRights.validationCommandForAccess(event,CommandConst.STOP_VOT)) {
+        } else if (validatorRights.validationCommandForAccess(event, CommandConst.STOP_VOT)) {
             return stopVotingCommand();
         }
         return null;
@@ -164,7 +156,7 @@ public class HandlerCommand {
         if (msg.equals(command)) {
             return null;
         }
-        if (isExistInParticipantsList(currentUser) /*&& !isMod(currentUser, Collections.emptyList())*/) {
+        if (isExistInParticipantsList(currentUser)) {
             return currentUser.getNick() + resourceMessages.getMessage(MessageConst.SORRY_ALREADY_VOTING);
         }
 
