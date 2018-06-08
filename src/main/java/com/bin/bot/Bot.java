@@ -6,7 +6,8 @@ import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.PingEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class Bot extends ListenerAdapter {
 

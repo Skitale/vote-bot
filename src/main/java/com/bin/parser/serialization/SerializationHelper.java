@@ -26,9 +26,9 @@ public class SerializationHelper {
     private Map<String, Collection> dataMap = new HashMap<>();
     private Map<String, Object> rowDataMap = new HashMap<>();
 
-    public void serialize(Set<String> userSet, List<GamePoint> gamesList){
+    public void serialize(Set<String> userSet, List<GamePoint> gamesList) {
         Path p = Paths.get(DATA_PATH);
-        try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(p))){
+        try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(p))) {
             oos.writeObject(userSet);
             oos.writeObject(gamesList);
         } catch (IOException e) {
@@ -36,9 +36,9 @@ public class SerializationHelper {
         }
     }
 
-    public void serializeSettings(boolean subMod, int maxGamesTop){
+    public void serializeSettings(boolean subMod, int maxGamesTop) {
         Path p = Paths.get(SETTINGS_DATA_PATH);
-        try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(p))){
+        try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(p))) {
             oos.writeBoolean(subMod);
             oos.writeInt(maxGamesTop);
         } catch (IOException e) {
@@ -46,43 +46,43 @@ public class SerializationHelper {
         }
     }
 
-    public Set<String> getUserSet(){
+    public Set<String> getUserSet() {
         Set<String> result = new HashSet<>();
-        if(dataMap.get(USER_SET_KEY) != null){
+        if (dataMap.get(USER_SET_KEY) != null) {
             result = (Set<String>) dataMap.get(USER_SET_KEY);
         }
         return result;
     }
 
-    public List<GamePoint> getGameList(){
+    public List<GamePoint> getGameList() {
         List<GamePoint> result = new ArrayList<>();
-        if(dataMap.get(GAME_LIST_KEY) != null){
+        if (dataMap.get(GAME_LIST_KEY) != null) {
             result = (List<GamePoint>) dataMap.get(GAME_LIST_KEY);
         }
         return result;
     }
 
-    public int getMaxTopGames(){
+    public int getMaxTopGames() {
         int result = 10;
-        if(rowDataMap.get(MAX_GAMES_TOP) != null){
+        if (rowDataMap.get(MAX_GAMES_TOP) != null) {
             result = (Integer) rowDataMap.get(MAX_GAMES_TOP);
         }
         return result;
     }
 
-    public boolean getCurrentSubMod(){
+    public boolean getCurrentSubMod() {
         boolean result = true;
-        if(rowDataMap.get(SUB_MOD) != null){
+        if (rowDataMap.get(SUB_MOD) != null) {
             result = (Boolean) rowDataMap.get(SUB_MOD);
         }
         return result;
     }
 
-    public void deserialize(){
+    public void deserialize() {
         Path p = Paths.get(DATA_PATH);
-        try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(p))){
-            Set<String> resSet = (Set<String>)ois.readObject();
-            List<GamePoint> resList = (List<GamePoint>)ois.readObject();
+        try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(p))) {
+            Set<String> resSet = (Set<String>) ois.readObject();
+            List<GamePoint> resList = (List<GamePoint>) ois.readObject();
             dataMap.put(USER_SET_KEY, resSet);
             dataMap.put(GAME_LIST_KEY, resList);
         } catch (IOException e) {
@@ -92,9 +92,9 @@ public class SerializationHelper {
         }
     }
 
-    public void deserializeSettings(){
+    public void deserializeSettings() {
         Path p = Paths.get(SETTINGS_DATA_PATH);
-        try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(p))){
+        try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(p))) {
             boolean submod = ois.readBoolean();
             int maxGamesTop = ois.readInt();
             rowDataMap.put(SUB_MOD, submod);

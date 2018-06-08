@@ -137,7 +137,7 @@ public class Parser {
         return configurationValues;
     }
 
-    public Map<String, List<Character>> getRightsValues(){
+    public Map<String, List<Character>> getRightsValues() {
         return rightsValues;
     }
 }

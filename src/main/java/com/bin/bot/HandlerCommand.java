@@ -13,7 +13,10 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,9 +36,9 @@ public class HandlerCommand {
     private boolean onlySubMode = true;
 
     public HandlerCommand(String owner, Map<String, List<Character>> rightsMap, List<String> excludeList, List<String> includeList, Map<String, String> messages) {
-        Runtime.getRuntime().addShutdownHook(new Thread(){
+        Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
-            public void run(){
+            public void run() {
                 serHelper.serialize(participantsList, participantsGamesList);
                 serHelper.serializeSettings(onlySubMode, maxGamesTop);
             }
@@ -187,14 +190,14 @@ public class HandlerCommand {
             String presence = isExistInOwnerListGame ? "yes" : "no";
             sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_TOP_GAME_ITEM, counter, nameGame, point, presence));
         }
-        if(maxIndex != 0) {
+        if (maxIndex != 0) {
             return sb.toString();
         } else {
             return resourceMessages.getMessage(MessageConst.EMPTY_LIST_GAMES);
         }
     }
 
-    private boolean existInOwnerListGame(GamePoint currentGame, List<Game> gameList){
+    private boolean existInOwnerListGame(GamePoint currentGame, List<Game> gameList) {
         for (Game g : gameList) {
             if (g.getAppid().equals(currentGame.getAppId())) {
                 return true;
@@ -209,7 +212,7 @@ public class HandlerCommand {
         for (String userName : participantsList) {
             sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_USERS_USER_ITEM, userName));
         }
-        if(participantsList.size() != 0) {
+        if (participantsList.size() != 0) {
             return sb.toString();
         } else {
             return resourceMessages.getMessage(MessageConst.EMPTY_LIST_USERS);
@@ -220,7 +223,7 @@ public class HandlerCommand {
         List<Game> gamesOwner = dataStorage.getGamesListOwner();
         StringBuilder sb = new StringBuilder();
         sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_ALL_GAMES));
-        for(int i = 0; i < participantsGamesList.size(); i++){
+        for (int i = 0; i < participantsGamesList.size(); i++) {
             GamePoint currentGame = participantsGamesList.get(i);
             boolean isExistInOwnerListGame = existInOwnerListGame(currentGame, gamesOwner);
 
@@ -230,7 +233,7 @@ public class HandlerCommand {
             String presence = isExistInOwnerListGame ? "yes" : "no";
             sb.append(resourceMessages.getMessage(MessageConst.LIST_OF_ALL_GAMES_ITEM, counter, nameGame, points, presence));
         }
-        if(participantsGamesList.size() != 0) {
+        if (participantsGamesList.size() != 0) {
             return sb.toString();
         } else {
             return resourceMessages.getMessage(MessageConst.EMPTY_LIST_GAMES);
@@ -249,15 +252,15 @@ public class HandlerCommand {
                 : resourceMessages.getMessage(MessageConst.SUB_MOD_OFF));
     }
 
-    private String maxTopCommand(String msg, String command){
+    private String maxTopCommand(String msg, String command) {
         if (msg.equals(command)) {
             return null;
         }
         String msgContent = msg.substring(command.length() + 1, msg.length());
         Pattern pattern = Pattern.compile("^(\\d)+$");
         Matcher matcher = pattern.matcher(msgContent);
-        if(matcher.find()){
-            if(Integer.valueOf(msgContent) == 0) return null;
+        if (matcher.find()) {
+            if (Integer.valueOf(msgContent) == 0) return null;
             maxGamesTop = Integer.valueOf(msgContent);
             attachSettings();
             return resourceMessages.getMessage(MessageConst.CHANGE_MAX_TOP, String.valueOf(maxGamesTop));
@@ -265,11 +268,11 @@ public class HandlerCommand {
         return null;
     }
 
-    private void attachChanges(){
+    private void attachChanges() {
         serHelper.serialize(participantsList, participantsGamesList);
     }
 
-    private void attachSettings(){
+    private void attachSettings() {
         serHelper.serializeSettings(onlySubMode, maxGamesTop);
     }
 }

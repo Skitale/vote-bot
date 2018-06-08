@@ -1,8 +1,8 @@
 package com.bin.validators;
 
 import com.bin.bot.Bot;
-import com.bin.consts.TwitchConst;
 import com.bin.consts.CommandConst;
+import com.bin.consts.TwitchConst;
 import org.pircbotx.User;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
@@ -20,34 +20,34 @@ public class RightsValidator {
     private Map<String, List<Character>> rightsMap;
     private String ownerNickName;
 
-    public RightsValidator(Map<String, List<Character>> rightsMap, String ownerNickName){
+    public RightsValidator(Map<String, List<Character>> rightsMap, String ownerNickName) {
         this.rightsMap = rightsMap;
         this.ownerNickName = ownerNickName;
     }
 
-    public boolean validationCommandForAccess(GenericMessageEvent e, String command){
+    public boolean validationCommandForAccess(GenericMessageEvent e, String command) {
         if (!checkEqualCommandInEvent(e, command)) return false;
-        command = command.replaceAll("!","");
+        command = command.replaceAll("!", "");
         User currentUser = e.getUser();
         List<Character> listRights = Collections.emptyList();
-        if(rightsMap.get(command) != null) {
+        if (rightsMap.get(command) != null) {
             listRights = rightsMap.get(command);
         }
-        if(listRights.contains('A')) return true;
-        if(currentUser.getNick().equals(ownerNickName)){
-            for(Character c : listRights){
-                if(c.equals('O')){
+        if (listRights.contains('A')) return true;
+        if (currentUser.getNick().equals(ownerNickName)) {
+            for (Character c : listRights) {
+                if (c.equals('O')) {
                     return true;
                 }
             }
         }
         List<String> listBadges = getBadgesForUser(e);
         logger.debug("list of badges for user {} : {}", e.getUser().getNick(), listBadges);
-        for(String badge : listBadges){
+        for (String badge : listBadges) {
             badge = badge.toLowerCase();
             Character codeBadge = TwitchConst.mapOfBadge.get(badge);
-            for(Character r : listRights){
-                if(r.equals(codeBadge)){
+            for (Character r : listRights) {
+                if (r.equals(codeBadge)) {
                     return true;
                 }
             }
@@ -66,8 +66,8 @@ public class RightsValidator {
         }
     }
 
-    private List<String> getBadgesForUser(GenericMessageEvent event){
-        if(event instanceof MessageEvent){
+    private List<String> getBadgesForUser(GenericMessageEvent event) {
+        if (event instanceof MessageEvent) {
             MessageEvent msgEvent = (MessageEvent) event;
             String badges = msgEvent.getV3Tags().get(TwitchConst.BADGES);
             return findAndGetBadge(badges);
@@ -75,11 +75,11 @@ public class RightsValidator {
         return Collections.emptyList();
     }
 
-    private List<String> findAndGetBadge(String badges){
-        String [] badgesArray = badges.split("(/\\d+)|,"); // example string "subscriber/6,bits/25000"
-        List<String>  result = new ArrayList<>();
-        for(String item : badgesArray){
-            if(!item.equals("")){
+    private List<String> findAndGetBadge(String badges) {
+        String[] badgesArray = badges.split("(/\\d+)|,"); // example string "subscriber/6,bits/25000"
+        List<String> result = new ArrayList<>();
+        for (String item : badgesArray) {
+            if (!item.equals("")) {
                 result.add(item);
             }
         }

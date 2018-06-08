@@ -43,7 +43,7 @@ public class MessageConst {
     private static final String DEFAULT_EMPTY_LIST_GAMES = "Currently there are no games in the list.";
     private static final String DEFAULT_EMPTY_LIST_USERS = "Currently there are no users in the list.";
 
-    public static String getDefaultMessage(String key){
+    public static String getDefaultMessage(String key) {
         try {
             Class clazz = MessageConst.class;
             Field field = clazz.getDeclaredField("DEFAULT_" + key);

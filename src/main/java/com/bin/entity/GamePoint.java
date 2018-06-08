@@ -4,7 +4,7 @@ import com.lukaspradel.steamapi.data.json.ownedgames.Game;
 
 import java.io.Serializable;
 
-public class GamePoint implements Comparable<GamePoint>, Serializable{
+public class GamePoint implements Comparable<GamePoint>, Serializable {
     private Integer points;
     private Integer appId;
     private String name;
